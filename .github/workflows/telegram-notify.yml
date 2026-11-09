@@ -19,14 +19,18 @@ jobs:
           BRANCH: ${{ github.ref_name }}
           COMPARE_URL: ${{ github.event.compare }}
         run: |
-          # jq reads the push details GitHub saves in $GITHUB_EVENT_PATH
-          # and builds one line per commit: short id + first line of the message
-          COMMITS=$(jq -r '.commits[] | "• " + .id[0:7] + " " + (.message | split("\n")[0])' "$GITHUB_EVENT_PATH")
+          # One line per commit: a clickable short id that opens the commit on GitHub,
+          # then the first line of the message. @html escapes < > & so Telegram
+          # can't mistake text in a commit message for HTML tags.
+          COMMITS=$(jq -r '.commits[] | "• <a href=\"" + .url + "\">" + .id[0:7] + "</a> " + (.message | split("\n")[0] | @html)' "$GITHUB_EVENT_PATH")
           COUNT=$(jq '.commits | length' "$GITHUB_EVENT_PATH")
+          # Same escaping for the branch name
+          BRANCH_HTML=$(jq -rn --arg v "$BRANCH" '$v | @html')
 
-          TEXT=$(printf 'Saffayna: %s commit(s) pushed to %s\n\n%s\n\n%s' "$COUNT" "$BRANCH" "$COMMITS" "$COMPARE_URL")
+          TEXT=$(printf 'Saffayna: %s commit(s) pushed to %s\n\n%s\n\n<a href="%s">View all changes</a>' "$COUNT" "$BRANCH_HTML" "$COMMITS" "$COMPARE_URL")
 
-          # Call the Telegram Bot API; --data-urlencode safely encodes the text
           curl -sS --fail -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${CHAT_ID}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode 'link_preview_options={"is_disabled":true}' \
             --data-urlencode "text=${TEXT}"
