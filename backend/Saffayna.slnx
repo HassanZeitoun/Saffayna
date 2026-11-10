@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Saffayna.Api/Saffayna.Api.csproj" />
+    <Project Path="src/Saffayna.Application/Saffayna.Application.csproj" />
+    <Project Path="src/Saffayna.Domain/Saffayna.Domain.csproj" />
+    <Project Path="src/Saffayna.Infrastructure/Saffayna.Infrastructure.csproj" />
+  </Folder>
+</Solution>

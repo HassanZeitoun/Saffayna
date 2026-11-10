@@ -1,0 +1,6 @@
+@Saffayna.Api_HostAddress = http://localhost:5052
+
+GET {{Saffayna.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
