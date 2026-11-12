@@ -23,5 +23,12 @@ public class AppDbContext : DbContext
         // Category name is required and limited to 100 characters.
         modelBuilder.Entity<Category>()
             .Property(c => c.Name).IsRequired().HasMaxLength(100);
+
+        // A category that still has expenses cannot be deleted (protects your history).
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Category)             // each transaction has one category
+            .WithMany()                          // a category has many transactions (we don't expose the list)
+            .HasForeignKey(t => t.CategoryId)    // linked through CategoryId
+            .OnDelete(DeleteBehavior.Restrict);  // refuse the delete instead of cascading
     }
 }
